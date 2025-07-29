@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kirim Pesan ke Telegram</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      position: relative;
+    }
+    input, textarea {
+      width: 100%;
+      margin: 1rem 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #1e1e1e;
+      color: #fff;
+    }
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: crimson;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #openChat {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 12px;
+      background: #333;
+      padding: 6px 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔐 Kirim Pesan ke Telegram Bot</h2>
+
+  <label>Token:</label>
+  <input type="text" id="token" placeholder="Masukkan token bot...">
+
+  <label>Chat ID:</label>
+  <input type="text" id="chatid" placeholder="Masukkan chat ID...">
+
+  <label>Pesan:</label>
+  <textarea id="pesan" placeholder="Tulis pesan..."></textarea>
+
+  <button onclick="kirimPesan()">🚀 Kirim Pesan</button>
+
+  <button id="openChat" onclick="bukaChat()">📊 Lihat Chat Bot</button>
+
+  <script>
+    async function kirimPesan() {
+      const token = document.getElementById("token").value;
+      const chatId = document.getElementById("chatid").value;
+      const pesan = document.getElementById("pesan").value;
+
+      if (!token || !chatId || !pesan) {
+        showToast('⚠️ Isi semua kolom!', 'orange');
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: pesan })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("pesan").value = '';
+          showToast('✅ Pesan berhasil dikirim!', 'green');
+        } else {
+          showToast(`❌ Gagal: ${data.description}`, 'red');
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, 'red');
+      }
+    }
+
+    function bukaChat() {
+      const token = document.getElementById("token").value;
+      const chatId = document.getElementById("chatid").value;
+      if (!token || !chatId) {
+        showToast('⚠️ Masukkan token & chat ID dulu!', 'orange');
+        return;
+      }
+
+      fetch('/set-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, chatId })
+      }).then(() => {
+        window.location.href = 'chat.html';
+      });
+    }
+
+    function showToast(msg, bg) {
+      Toastify({
+        text: msg,
+        duration: 3000,
+        gravity: "bottom",
+        position: "center",
+        backgroundColor: bg,
+        stopOnFocus: true,
+      }).showToast();
+    }
+  </script>
+</body>
+</html>
