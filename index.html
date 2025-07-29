@@ -1,172 +1,162 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no" />
-  <title>Telegram Bot Panel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🔴 Telegram Bot Control</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
   <style>
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      user-select: none;
     }
+
     body {
-      background: #1b1b1b;
-      color: #f8f8f8;
       font-family: 'Segoe UI', sans-serif;
+      background-color: #1a1a1a;
+      color: #f0f0f0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
       overflow: hidden;
-      position: relative;
     }
-    h2 {
+
+    h1 {
+      color: #ff3b3b;
+      margin-bottom: 10px;
+    }
+
+    p {
       margin-bottom: 20px;
-      color: #ff4e4e;
+      text-align: center;
     }
-    .form-container {
-      background: #2b2b2b;
-      padding: 30px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-    }
+
     input, textarea {
       width: 100%;
-      padding: 12px;
+      max-width: 400px;
+      padding: 10px;
       margin: 10px 0;
       border: none;
       border-radius: 8px;
-      font-size: 15px;
-      background: #3a3a3a;
-      color: #fff;
+      font-size: 16px;
+      background-color: #2a2a2a;
+      color: #f0f0f0;
+      outline: none;
     }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #ff4e4e;
+
+    button.send-button {
+      background-color: #ff3b3b;
       color: white;
-      font-weight: bold;
       border: none;
+      padding: 12px 24px;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
-      transition: 0.3s;
+      margin-top: 10px;
+      transition: background 0.2s;
     }
-    button:hover {
-      background: #e84141;
+
+    button.send-button:hover {
+      background-color: #e62e2e;
     }
-    #toast {
+
+    .dashboard-button {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #262626;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
-      display: none;
-      animation: fadeInOut 3s ease-in-out;
-    }
-    @keyframes fadeInOut {
-      0% {opacity: 0;}
-      10% {opacity: 1;}
-      90% {opacity: 1;}
-      100% {opacity: 0;}
-    }
-    .top-right-btn {
-      position: absolute;
       top: 15px;
       right: 15px;
-      background: transparent;
-      border: 2px solid #ff4e4e;
-      color: #ff4e4e;
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 20px;
+      background-color: #333;
+      border: none;
+      color: #ff3b3b;
+      padding: 10px 14px;
+      font-size: 16px;
+      border-radius: 50%;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.2s;
     }
-    .top-right-btn:hover {
-      background: #ff4e4e;
-      color: #fff;
+
+    .dashboard-button:hover {
+      background-color: #444;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+  <button class="dashboard-button" onclick="bukaDashboard()">🔍</button>
 
-  <button class="top-right-btn" onclick="lihatChat()">💬 Lihat Chat Bot</button>
-
-  <h2>🚀 Kirim Pesan ke Telegram Bot</h2>
   <div class="form-container">
-    <input type="text" id="token" placeholder="🔐 Masukkan Token Bot">
-    <input type="text" id="chatid" placeholder="🎯 Masukkan Chat ID">
-    <textarea id="pesan" rows="4" placeholder="💬 Tulis Pesan..."></textarea>
-    <button onclick="kirimPesan()">🚀 Kirim Pesan</button>
+    <h1>Kontrol Bot Telegram</h1>
+    <p>Masukkan Token, Chat ID, dan pesan untuk mengirim ke bot Anda.</p>
+
+    <input type="text" id="token" placeholder="Token Bot Telegram" autocomplete="off" />
+    <input type="text" id="chatid" placeholder="Chat ID Telegram" autocomplete="off" />
+    <textarea id="message" rows="4" placeholder="Tulis pesan Anda di sini..."></textarea>
+    <button class="send-button" onclick="kirimPesan()">Kirim Pesan</button>
   </div>
 
-  <div id="toast"></div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   <script>
-    function showToast(msg, isError = false) {
-      const toast = document.getElementById("toast");
-      toast.innerText = msg;
-      toast.style.backgroundColor = isError ? "#9a2525" : "#2e8b57";
-      toast.style.display = "block";
-      setTimeout(() => {
-        toast.style.display = "none";
-      }, 3000);
-    }
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-bottom-center",
+      "timeOut": "3000",
+      "theme": "dark"
+    };
 
-    async function kirimPesan() {
+    function kirimPesan() {
       const token = document.getElementById("token").value.trim();
-      const chatId = document.getElementById("chatid").value.trim();
-      const pesan = document.getElementById("pesan").value.trim();
+      const chatid = document.getElementById("chatid").value.trim();
+      const message = document.getElementById("message").value.trim();
 
-      if (!token || !chatId || !pesan) {
-        showToast("⚠️ Semua kolom wajib diisi!", true);
+      if (!token || !chatid || !message) {
+        toastr.warning("Mohon lengkapi semua field terlebih dahulu!");
         return;
       }
 
-      try {
-        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: pesan,
-            parse_mode: "HTML"
-          })
-        });
-
-        const data = await res.json();
-        if (data.ok) {
-          showToast("✅ Pesan berhasil dikirim!");
-          document.getElementById("pesan").value = "";
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatid,
+          text: message
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.ok) {
+          toastr.success("Pesan berhasil dikirim!");
+          document.getElementById("message").value = "";
         } else {
-          showToast(`❌ Gagal: ${data.description}`, true);
+          toastr.error("Gagal mengirim pesan! Periksa token dan chat ID.");
         }
-      } catch (err) {
-        showToast(`❌ Error: ${err.message}`, true);
-      }
+      })
+      .catch(() => toastr.error("Terjadi kesalahan jaringan!"));
     }
 
-    function lihatChat() {
+    function bukaDashboard() {
       const token = document.getElementById("token").value.trim();
-      const chatId = document.getElementById("chatid").value.trim();
-      if (!token || !chatId) {
-        showToast("⚠️ Token dan Chat ID harus diisi!", true);
+      const chatid = document.getElementById("chatid").value.trim();
+
+      if (!token || !chatid) {
+        toastr.warning("Masukkan Token dan Chat ID terlebih dahulu!");
         return;
       }
-      // Simpan di localStorage lalu arahkan
-      localStorage.setItem("token", token);
-      localStorage.setItem("chatid", chatId);
-      window.location.href = "/dashboard.html";
+
+      const url = `https://8d71a66c-a9ac-4c99-b133-a9f2397008dd-00-26f7p1m9p5my6.pike.replit.dev/dashboard.html?token=${encodeURIComponent(token)}&chatid=${encodeURIComponent(chatid)}`;
+      window.open(url, "_blank");
     }
   </script>
-
 </body>
 </html>
